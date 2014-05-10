@@ -1,6 +1,6 @@
 Custodian
 =========
 
-Custodian is a very simple system for help financial management.
+Custodian is a very simple system for financial management.
 
 This development is just beginning...
