@@ -11,7 +11,8 @@ class Account(models.Model):
 	name = models.CharField(max_length=128, unique=True, verbose_name='Name')
 	init_balance = models.DecimalField(max_digits=13, decimal_places=2, 
 									default=Decimal('0.00'), verbose_name='Initial Balance')
-	balance = models.DecimalField(max_digits=13, decimal_places=2, default=Decimal('0.00'), verbose_name='Balance')
+	balance = models.DecimalField(max_digits=13, decimal_places=2, 
+									default=Decimal('0.00'), verbose_name='Balance')
 	creation_date = models.DateField(auto_now_add=True, verbose_name='Creation Date')
 	owner = models.ForeignKey(User, related_name='accounts', verbose_name='Owner')
 	
