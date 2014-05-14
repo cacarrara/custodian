@@ -50,7 +50,7 @@ class Person(models.Model):
 	business_segment = models.ForeignKey(BusinessSegment, verbose_name='Business Segment')
 
 	def __str__(self):
-		return "%s (%s)" % self.name, self.document
+		return "%s (%s)" % (self.name, self.document)
 
 
 class Transaction(models.Model):

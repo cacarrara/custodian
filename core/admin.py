@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import Account
+from core.models import Account, BusinessSegment, Person
 
 
 class AccountAdmin(admin.ModelAdmin):
@@ -30,4 +30,12 @@ class AccountAdmin(admin.ModelAdmin):
 		else:
 			return self.readonly_fields
 
+
+class PersonAdmin(admin.ModelAdmin):
+    list_display = ('name', 'document', 'city', 'business_segment')
+    search_fields = ('name', 'document', 'city', 'business_segment__name')
+
+
 admin.site.register(Account, AccountAdmin)
+admin.site.register(BusinessSegment)
+admin.site.register(Person, PersonAdmin)
