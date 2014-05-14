@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from core.models import (Account, BusinessSegment, Person, 
-                        Receivable, Payable)
+                        Receivable, Payable, Revenue, Expense)
 
 
 class AccountAdmin(admin.ModelAdmin):
@@ -48,8 +48,22 @@ class PayableAdmin(admin.ModelAdmin):
                     'description', 'account')
     search_fields = ('supplier__name', 'description', 'account__name')
 
+
+class RevenueAdmin(admin.ModelAdmin):
+    list_display = ('value', 'date', 'customer', 'account')
+    search_fields = ('account__name', 'customer__name')
+    list_filter = ('date', 'account',)
+
+
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = ('value', 'date', 'supplier', 'account')
+    search_fields = ('account__name', 'supplier__name')
+    list_filter = ('date', 'account',)
+
 admin.site.register(Account, AccountAdmin)
 admin.site.register(BusinessSegment)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Receivable, ReceivableAdmin)
 admin.site.register(Payable, PayableAdmin)
+admin.site.register(Revenue, RevenueAdmin)
+admin.site.register(Expense, ExpenseAdmin)

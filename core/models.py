@@ -65,12 +65,20 @@ class Transaction(models.Model):
     account = models.ForeignKey(Account, related_name='related_transactions', verbose_name='Related Account')
 
 
+@python_2_unicode_compatible
 class Revenue(Transaction):
     customer = models.ForeignKey(Person, related_name='revenues', verbose_name='Customer')
 
+    def __str__(self):
+        return '%s - %s' % (self.value, self.customer.name)
 
+
+@python_2_unicode_compatible
 class Expense(Transaction):
     supplier = models.ForeignKey(Person, related_name='expenses', verbose_name='Supplier')
+
+    def __str__(self):
+        return '%s - %s' % (self.value, self.supplier.name)
 
 
 class TransactionEvent(models.Model):
@@ -83,9 +91,17 @@ class TransactionEvent(models.Model):
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPES)
 
 
+@python_2_unicode_compatible
 class Receivable(Accounts):
     customer = models.ForeignKey(Person, related_name='receivables', verbose_name='Customer')
 
+    def __str__(self):
+        return '%s: %s - %s' % (self.due_date, self.value, self.customer.name)
 
+
+@python_2_unicode_compatible
 class Payable(Accounts):
     supplier = models.ForeignKey(Person, related_name='payables', verbose_name='Supplier')
+
+    def __str__(self):
+        return '%s: %s - %s' % (self.due_date, self.value, self.supplier.name)
