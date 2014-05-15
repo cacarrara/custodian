@@ -1,5 +1,6 @@
 Django==1.6.4
 South==0.8.4
+django-suit==0.2.8
 psycopg2==2.5.2
 python-decouple==2.2
 wsgiref==0.1.2
