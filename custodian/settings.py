@@ -103,3 +103,24 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'Custodian - Basic Financial Management',
+    'SEARCH_URL': '',
+    'MENU': (
+        'sites',
+        'auth',
+        '-',
+        {'label': 'Registers', 'icon': 'icon-cog',
+            'models': ('core.payable',
+                        'core.receivable',
+                        'core.person', 
+                        'core.account',
+                        'core.businesssegment',
+            )
+        },
+        {'label': 'Operations', 'icon': 'icon-pencil',
+            'models': ('core.expense', 'core.revenue',)},
+        '-',
+    ),
+}
