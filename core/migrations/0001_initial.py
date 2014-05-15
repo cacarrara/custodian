@@ -19,16 +19,6 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'core', ['Account'])
 
-        # Adding model 'Accounts'
-        db.create_table(u'core_accounts', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('value', self.gf('django.db.models.fields.DecimalField')(default='0.00', max_digits=13, decimal_places=2)),
-            ('due_date', self.gf('django.db.models.fields.DateField')()),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=256)),
-            ('account', self.gf('django.db.models.fields.related.ForeignKey')(related_name='related_accounts', to=orm['core.Account'])),
-        ))
-        db.send_create_signal(u'core', ['Accounts'])
-
         # Adding model 'BusinessSegment'
         db.create_table(u'core_businesssegment', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -84,14 +74,22 @@ class Migration(SchemaMigration):
 
         # Adding model 'Receivable'
         db.create_table(u'core_receivable', (
-            (u'accounts_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['core.Accounts'], unique=True, primary_key=True)),
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('value', self.gf('django.db.models.fields.DecimalField')(default='0.00', max_digits=13, decimal_places=2)),
+            ('due_date', self.gf('django.db.models.fields.DateField')()),
+            ('description', self.gf('django.db.models.fields.CharField')(max_length=256)),
+            ('account', self.gf('django.db.models.fields.related.ForeignKey')(related_name='related_receivables', to=orm['core.Account'])),
             ('customer', self.gf('django.db.models.fields.related.ForeignKey')(related_name='receivables', to=orm['core.Person'])),
         ))
         db.send_create_signal(u'core', ['Receivable'])
 
         # Adding model 'Payable'
         db.create_table(u'core_payable', (
-            (u'accounts_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['core.Accounts'], unique=True, primary_key=True)),
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('value', self.gf('django.db.models.fields.DecimalField')(default='0.00', max_digits=13, decimal_places=2)),
+            ('due_date', self.gf('django.db.models.fields.DateField')()),
+            ('description', self.gf('django.db.models.fields.CharField')(max_length=256)),
+            ('account', self.gf('django.db.models.fields.related.ForeignKey')(related_name='related_payables', to=orm['core.Account'])),
             ('supplier', self.gf('django.db.models.fields.related.ForeignKey')(related_name='payables', to=orm['core.Person'])),
         ))
         db.send_create_signal(u'core', ['Payable'])
@@ -100,9 +98,6 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Deleting model 'Account'
         db.delete_table(u'core_account')
-
-        # Deleting model 'Accounts'
-        db.delete_table(u'core_accounts')
 
         # Deleting model 'BusinessSegment'
         db.delete_table(u'core_businesssegment')
@@ -175,14 +170,6 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'accounts'", 'to': u"orm['auth.User']"})
         },
-        u'core.accounts': {
-            'Meta': {'object_name': 'Accounts'},
-            'account': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'related_accounts'", 'to': u"orm['core.Account']"}),
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
-            'due_date': ('django.db.models.fields.DateField', [], {}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'value': ('django.db.models.fields.DecimalField', [], {'default': "'0.00'", 'max_digits': '13', 'decimal_places': '2'})
-        },
         u'core.businesssegment': {
             'Meta': {'object_name': 'BusinessSegment'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -194,9 +181,13 @@ class Migration(SchemaMigration):
             u'transaction_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['core.Transaction']", 'unique': 'True', 'primary_key': 'True'})
         },
         u'core.payable': {
-            'Meta': {'object_name': 'Payable', '_ormbases': [u'core.Accounts']},
-            u'accounts_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['core.Accounts']", 'unique': 'True', 'primary_key': 'True'}),
-            'supplier': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'payables'", 'to': u"orm['core.Person']"})
+            'Meta': {'ordering': "['due_date']", 'object_name': 'Payable'},
+            'account': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'related_payables'", 'to': u"orm['core.Account']"}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
+            'due_date': ('django.db.models.fields.DateField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'supplier': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'payables'", 'to': u"orm['core.Person']"}),
+            'value': ('django.db.models.fields.DecimalField', [], {'default': "'0.00'", 'max_digits': '13', 'decimal_places': '2'})
         },
         u'core.person': {
             'Meta': {'object_name': 'Person'},
@@ -211,9 +202,13 @@ class Migration(SchemaMigration):
             'state': ('django.db.models.fields.CharField', [], {'max_length': '128'})
         },
         u'core.receivable': {
-            'Meta': {'object_name': 'Receivable', '_ormbases': [u'core.Accounts']},
-            u'accounts_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['core.Accounts']", 'unique': 'True', 'primary_key': 'True'}),
-            'customer': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'receivables'", 'to': u"orm['core.Person']"})
+            'Meta': {'ordering': "['due_date']", 'object_name': 'Receivable'},
+            'account': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'related_receivables'", 'to': u"orm['core.Account']"}),
+            'customer': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'receivables'", 'to': u"orm['core.Person']"}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
+            'due_date': ('django.db.models.fields.DateField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'value': ('django.db.models.fields.DecimalField', [], {'default': "'0.00'", 'max_digits': '13', 'decimal_places': '2'})
         },
         u'core.revenue': {
             'Meta': {'object_name': 'Revenue', '_ormbases': [u'core.Transaction']},

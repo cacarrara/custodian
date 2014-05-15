@@ -27,9 +27,9 @@ class Accounts(models.Model):
     value = models.DecimalField(max_digits=13, decimal_places=2, default=Decimal('0.00'), verbose_name='Value')
     due_date = models.DateField(verbose_name='Due Date')
     description = models.CharField(max_length=256, verbose_name='Description')
-    account = models.ForeignKey(Account, related_name='related_accounts', verbose_name='Related Account')
 
     class Meta:
+        abstract = True
         ordering = ['due_date']
 
 
@@ -93,6 +93,7 @@ class TransactionEvent(models.Model):
 
 @python_2_unicode_compatible
 class Receivable(Accounts):
+    account = models.ForeignKey(Account, related_name='related_receivables', verbose_name='Related Account')
     customer = models.ForeignKey(Person, related_name='receivables', verbose_name='Customer')
 
     def __str__(self):
@@ -101,6 +102,7 @@ class Receivable(Accounts):
 
 @python_2_unicode_compatible
 class Payable(Accounts):
+    account = models.ForeignKey(Account, related_name='related_payables', verbose_name='Related Account')
     supplier = models.ForeignKey(Person, related_name='payables', verbose_name='Supplier')
 
     def __str__(self):
