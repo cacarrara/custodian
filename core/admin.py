@@ -4,6 +4,25 @@ from django.contrib import admin
 from core.models import (Account, BusinessSegment, Person, 
                         Receivable, Payable, Revenue, Expense)
 
+def get_next_month(due_date):
+    new_year = due_date.year
+    new_month = due_date.month
+    new_day = due_date.day
+
+    if new_month == 12:
+        new_month = 1
+        new_year = due_date.year + 1
+    else:
+        new_month = due_date.month + 1
+
+    new_due_date = None
+    try:
+        new_due_date = datetime.date(new_year,new_month,new_day)
+    except ValueError:
+        new_due_date = datetime.date(new_year,new_month,new_day - 1)
+
+    return new_due_date
+
 
 class AccountAdmin(admin.ModelAdmin):
     exclude = ('owner', )
@@ -42,6 +61,20 @@ class ReceivableAdmin(admin.ModelAdmin):
     list_display = ('customer', 'value', 'due_date',
                     'description', 'account')
     search_fields = ('customer__name', 'description', 'account__name')
+    actions = ('repeat_next_month',)
+
+    def repeat_next_month(self, request, queryset):
+        for receivable in queryset:
+            new_due_date = get_next_month(receivable.due_date)
+            new_payable = Receivable.objects.create(
+                            value=receivable.value,
+                            due_date=new_due_date,
+                            description=receivable.description,
+                            account=receivable.account,
+                            customer=receivable.customer
+                        )
+
+            new_payable.save()
 
 
 class PayableAdmin(admin.ModelAdmin):
@@ -52,22 +85,7 @@ class PayableAdmin(admin.ModelAdmin):
 
     def repeat_next_month(self, request, queryset):
         for payable in queryset:
-            new_year = payable.due_date.year
-            new_month = payable.due_date.month
-            new_day = payable.due_date.day
-
-            if new_month == 12:
-                new_month = 1
-                new_year = payable.due_date.year + 1
-            else:
-                new_month = payable.due_date.month + 1
-
-            new_due_date = None
-            try:
-                new_due_date = datetime.date(new_year,new_month,new_day)
-            except ValueError:
-                new_due_date = datetime.date(new_year,new_month,new_day - 1)
-            
+            new_due_date = get_next_month(payable.due_date)
             new_payable = Payable.objects.create(
                             value=payable.value,
                             due_date=new_due_date,
@@ -75,7 +93,6 @@ class PayableAdmin(admin.ModelAdmin):
                             account=payable.account,
                             supplier=payable.supplier
                         )
-            
             new_payable.save()
 
 
