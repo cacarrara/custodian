@@ -62,11 +62,14 @@ class Person(models.Model):
 class Transaction(models.Model):
     date = models.DateField(auto_now_add=True, verbose_name='Date')
     value = models.DecimalField(max_digits=13, decimal_places=2, verbose_name='Value')
-    account = models.ForeignKey(Account, related_name='related_transactions', verbose_name='Related Account')
+
+    class Meta:
+        abstract = True
 
 
 @python_2_unicode_compatible
 class Revenue(Transaction):
+    account = models.ForeignKey(Account, related_name='related_revenues', verbose_name='Related Account')
     customer = models.ForeignKey(Person, related_name='revenues', verbose_name='Customer')
 
     def __str__(self):
@@ -75,6 +78,7 @@ class Revenue(Transaction):
 
 @python_2_unicode_compatible
 class Expense(Transaction):
+    account = models.ForeignKey(Account, related_name='related_expenses', verbose_name='Related Account')
     supplier = models.ForeignKey(Person, related_name='expenses', verbose_name='Supplier')
 
     def __str__(self):

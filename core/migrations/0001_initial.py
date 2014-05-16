@@ -40,25 +40,22 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'core', ['Person'])
 
-        # Adding model 'Transaction'
-        db.create_table(u'core_transaction', (
+        # Adding model 'Revenue'
+        db.create_table(u'core_revenue', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
             ('value', self.gf('django.db.models.fields.DecimalField')(max_digits=13, decimal_places=2)),
-            ('account', self.gf('django.db.models.fields.related.ForeignKey')(related_name='related_transactions', to=orm['core.Account'])),
-        ))
-        db.send_create_signal(u'core', ['Transaction'])
-
-        # Adding model 'Revenue'
-        db.create_table(u'core_revenue', (
-            (u'transaction_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['core.Transaction'], unique=True, primary_key=True)),
+            ('account', self.gf('django.db.models.fields.related.ForeignKey')(related_name='related_revenues', to=orm['core.Account'])),
             ('customer', self.gf('django.db.models.fields.related.ForeignKey')(related_name='revenues', to=orm['core.Person'])),
         ))
         db.send_create_signal(u'core', ['Revenue'])
 
         # Adding model 'Expense'
         db.create_table(u'core_expense', (
-            (u'transaction_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['core.Transaction'], unique=True, primary_key=True)),
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('value', self.gf('django.db.models.fields.DecimalField')(max_digits=13, decimal_places=2)),
+            ('account', self.gf('django.db.models.fields.related.ForeignKey')(related_name='related_expenses', to=orm['core.Account'])),
             ('supplier', self.gf('django.db.models.fields.related.ForeignKey')(related_name='expenses', to=orm['core.Person'])),
         ))
         db.send_create_signal(u'core', ['Expense'])
@@ -104,9 +101,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Person'
         db.delete_table(u'core_person')
-
-        # Deleting model 'Transaction'
-        db.delete_table(u'core_transaction')
 
         # Deleting model 'Revenue'
         db.delete_table(u'core_revenue')
@@ -176,9 +170,12 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'})
         },
         u'core.expense': {
-            'Meta': {'object_name': 'Expense', '_ormbases': [u'core.Transaction']},
+            'Meta': {'object_name': 'Expense'},
+            'account': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'related_expenses'", 'to': u"orm['core.Account']"}),
+            'date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'supplier': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'expenses'", 'to': u"orm['core.Person']"}),
-            u'transaction_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['core.Transaction']", 'unique': 'True', 'primary_key': 'True'})
+            'value': ('django.db.models.fields.DecimalField', [], {'max_digits': '13', 'decimal_places': '2'})
         },
         u'core.payable': {
             'Meta': {'ordering': "['due_date']", 'object_name': 'Payable'},
@@ -211,13 +208,9 @@ class Migration(SchemaMigration):
             'value': ('django.db.models.fields.DecimalField', [], {'default': "'0.00'", 'max_digits': '13', 'decimal_places': '2'})
         },
         u'core.revenue': {
-            'Meta': {'object_name': 'Revenue', '_ormbases': [u'core.Transaction']},
+            'Meta': {'object_name': 'Revenue'},
+            'account': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'related_revenues'", 'to': u"orm['core.Account']"}),
             'customer': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'revenues'", 'to': u"orm['core.Person']"}),
-            u'transaction_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['core.Transaction']", 'unique': 'True', 'primary_key': 'True'})
-        },
-        u'core.transaction': {
-            'Meta': {'object_name': 'Transaction'},
-            'account': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'related_transactions'", 'to': u"orm['core.Account']"}),
             'date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'value': ('django.db.models.fields.DecimalField', [], {'max_digits': '13', 'decimal_places': '2'})
