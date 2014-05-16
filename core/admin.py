@@ -1,3 +1,4 @@
+import datetime
 from django.contrib import admin
 
 from core.models import (Account, BusinessSegment, Person, 
@@ -47,6 +48,35 @@ class PayableAdmin(admin.ModelAdmin):
     list_display = ('supplier', 'value', 'due_date',
                     'description', 'account')
     search_fields = ('supplier__name', 'description', 'account__name')
+    actions = ('repeat_next_month',)
+
+    def repeat_next_month(self, request, queryset):
+        for payable in queryset:
+            new_year = payable.due_date.year
+            new_month = payable.due_date.month
+            new_day = payable.due_date.day
+
+            if new_month == 12:
+                new_month = 1
+                new_year = payable.due_date.year + 1
+            else:
+                new_month = payable.due_date.month + 1
+
+            new_due_date = None
+            try:
+                new_due_date = datetime.date(new_year,new_month,new_day)
+            except ValueError:
+                new_due_date = datetime.date(new_year,new_month,new_day - 1)
+            
+            new_payable = Payable.objects.create(
+                            value=payable.value,
+                            due_date=new_due_date,
+                            description=payable.description,
+                            account=payable.account,
+                            supplier=payable.supplier
+                        )
+            
+            new_payable.save()
 
 
 class RevenueAdmin(admin.ModelAdmin):
