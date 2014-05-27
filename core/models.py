@@ -3,6 +3,8 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 
 
@@ -90,6 +92,7 @@ class TransactionEvent(models.Model):
         ('E', 'Expense'),
         ('R', 'Revenue'),
     )
+    account = models.ForeignKey(Account, related_name='related_transaction_events', verbose_name='Related Account')
     date = models.DateField(auto_now_add=True, verbose_name='Date')
     value = models.DecimalField(max_digits=13, decimal_places=2, verbose_name='Value')
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPES)
@@ -111,3 +114,21 @@ class Payable(Accounts):
 
     def __str__(self):
         return '%s: %s - %s' % (self.due_date, self.value, self.supplier.name)
+
+
+@receiver(post_save, sender=Revenue)
+@receiver(post_save, sender=Expense)
+def post_save_transaction_event(sender, **kwargs):
+    transaction_type = None
+    if sender == Revenue:
+        transaction_type = 'R'
+    elif sender == Expense:
+        transaction_type = 'E'
+
+    transaction = kwargs['instance']
+    transaction_event = TransactionEvent.objects.create(
+            value=transaction.value,
+            transaction_type=transaction_type,
+            account=transaction.account
+        )
+    transaction_event.save()
