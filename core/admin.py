@@ -1,8 +1,11 @@
+# coding: utf-8
 import datetime
 from django.contrib import admin
 
 from core.models import (Account, BusinessSegment, Person, 
                         Receivable, Payable, Revenue, Expense)
+from core.forms import ReceivableModelForm, PayableModelForm
+
 
 def get_next_month(due_date):
     new_year = due_date.year
@@ -33,7 +36,7 @@ class AccountAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         """
         Checks if object has no attribute owner (so is a insert operation,
-        because it is removed from admin form) to set current 
+        because it is ëxcluded from admin form) to set current 
         user to owner and initial balance to current balance
         """
         if not hasattr(obj, 'owner'):
@@ -51,6 +54,10 @@ class AccountAdmin(admin.ModelAdmin):
         else:
             return self.readonly_fields
 
+    def get_queryset(self, request):
+        qs = super(AccountAdmin, self).get_queryset(request)
+        return qs.filter(owner=request.user)
+
 
 class PersonAdmin(admin.ModelAdmin):
     list_display = ('name', 'document', 'city', 'business_segment')
@@ -58,10 +65,15 @@ class PersonAdmin(admin.ModelAdmin):
 
 
 class ReceivableAdmin(admin.ModelAdmin):
+    form = ReceivableModelForm
     list_display = ('customer', 'value', 'due_date',
                     'description', 'account')
     search_fields = ('customer__name', 'description', 'account__name')
     actions = ('repeat_next_month',)
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.form.user = request.user
+        return super(ReceivableAdmin, self).get_form(request, **kwargs)
 
     def repeat_next_month(self, request, queryset):
         for receivable in queryset:
@@ -78,10 +90,15 @@ class ReceivableAdmin(admin.ModelAdmin):
 
 
 class PayableAdmin(admin.ModelAdmin):
+    form = PayableModelForm
     list_display = ('supplier', 'value', 'due_date',
                     'description', 'account')
     search_fields = ('supplier__name', 'description', 'account__name')
     actions = ('repeat_next_month',)
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.form.user = request.user
+        return super(PayableAdmin, self).get_form(request, **kwargs)
 
     def repeat_next_month(self, request, queryset):
         for payable in queryset:
