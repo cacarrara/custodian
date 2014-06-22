@@ -38,6 +38,7 @@ class Accounts(models.Model):
 @python_2_unicode_compatible
 class BusinessSegment(models.Model):
     name = models.CharField(max_length=128, unique=True, verbose_name='Name')
+    owner = models.ForeignKey(User, related_name="business_segments", verbose_name="Owner")
 
     def __str__(self):
         return self.name
@@ -53,6 +54,7 @@ class Person(models.Model):
     state = models.CharField(max_length=128, verbose_name='State')
     country = models.CharField(max_length=128, verbose_name='Country')
     business_segment = models.ForeignKey(BusinessSegment, verbose_name='Business Segment')
+    owner = models.ForeignKey(User, related_name="persons", verbose_name="Owner")
 
     def __str__(self):
         if self.document:
