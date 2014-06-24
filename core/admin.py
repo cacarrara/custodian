@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from core.models import (Account, BusinessSegment, Person, 
                         Receivable, Payable, Revenue, Expense)
-from core.forms import ReceivableModelForm, PayableModelForm
+from core.forms import ReceivableModelForm, PayableModelForm, PersonModelForm
 
 
 def get_next_month(due_date):
@@ -36,8 +36,8 @@ class AccountAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         """
         Checks if object has no attribute owner (so is a insert operation,
-        because it is ëxcluded from admin form) to set current 
-        user to owner and initial balance to current balance
+        because it is excluded from admin form) to set current 
+        user as owner and initial balance to current balance
         """
         if not hasattr(obj, 'owner'):
             obj.owner = request.user
@@ -60,8 +60,27 @@ class AccountAdmin(admin.ModelAdmin):
 
 
 class PersonAdmin(admin.ModelAdmin):
+    form = PersonModelForm
+    exclude = ('owner', )
     list_display = ('name', 'document', 'city', 'business_segment')
     search_fields = ('name', 'document', 'city', 'business_segment__name')
+
+    def save_model(self, request, obj, form, change):
+        """
+        Checks if object has no attribute owner (so is a insert operation,
+        because it is excluded from admin form) to set current user as owner
+        """
+        if not hasattr(obj, 'owner'):
+            obj.owner = request.user
+        obj.save()
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.form.user = request.user
+        return super(PersonAdmin, self).get_form(request, **kwargs)
+
+    def get_queryset(self, request):
+        qs = super(PersonAdmin, self).get_queryset(request)
+        return qs.filter(owner=request.user)
 
 
 class ReceivableAdmin(admin.ModelAdmin):
@@ -88,6 +107,10 @@ class ReceivableAdmin(admin.ModelAdmin):
 
             new_payable.save()
 
+    def get_queryset(self, request):
+        qs = super(ReceivableAdmin, self).get_queryset(request)
+        return qs.filter(account__owner=request.user)
+
 
 class PayableAdmin(admin.ModelAdmin):
     form = PayableModelForm
@@ -112,6 +135,10 @@ class PayableAdmin(admin.ModelAdmin):
                         )
             new_payable.save()
 
+    def get_queryset(self, request):
+        qs = super(PayableAdmin, self).get_queryset(request)
+        return qs.filter(account__owner=request.user)
+
 
 class RevenueAdmin(admin.ModelAdmin):
     list_display = ('value', 'date', 'customer', 'account')
@@ -124,8 +151,26 @@ class ExpenseAdmin(admin.ModelAdmin):
     search_fields = ('account__name', 'supplier__name')
     list_filter = ('date', 'account',)
 
+
+class BusinessSegmentAdmin(admin.ModelAdmin):
+    exclude = ('owner', )
+
+    def save_model(self, request, obj, form, change):
+        """
+        Checks if object has no attribute owner (so is a insert operation,
+        because it is excluded from admin form) to set current user as owner
+        """
+        if not hasattr(obj, 'owner'):
+            obj.owner = request.user
+        obj.save()
+
+    def get_queryset(self, request):
+        qs = super(BusinessSegmentAdmin, self).get_queryset(request)
+        return qs.filter(owner=request.user)
+
+
 admin.site.register(Account, AccountAdmin)
-admin.site.register(BusinessSegment)
+admin.site.register(BusinessSegment, BusinessSegmentAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Receivable, ReceivableAdmin)
 admin.site.register(Payable, PayableAdmin)
