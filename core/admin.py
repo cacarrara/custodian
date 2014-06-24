@@ -29,7 +29,7 @@ def get_next_month(due_date):
 
 class AccountAdmin(admin.ModelAdmin):
     exclude = ('owner', )
-    list_display = ('name', 'balance', 'creation_date', 'owner', )
+    list_display = ('name', 'balance', 'creation_date', )
     readonly_fields = ('balance', )
     search_fields = ('name', )
 
@@ -154,6 +154,7 @@ class ExpenseAdmin(admin.ModelAdmin):
 
 class BusinessSegmentAdmin(admin.ModelAdmin):
     exclude = ('owner', )
+    search_fields = ('name', )
 
     def save_model(self, request, obj, form, change):
         """
