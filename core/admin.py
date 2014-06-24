@@ -91,8 +91,9 @@ class ReceivableAdmin(admin.ModelAdmin):
     actions = ('repeat_next_month',)
 
     def get_form(self, request, obj=None, **kwargs):
-        if obj != None:
+        if obj != None and obj.is_past_due():
             self.exclude = ('due_date', )
+
         self.form.user = request.user
         return super(ReceivableAdmin, self).get_form(request, **kwargs)
 
@@ -122,8 +123,9 @@ class PayableAdmin(admin.ModelAdmin):
     actions = ('repeat_next_month',)
 
     def get_form(self, request, obj=None, **kwargs):
-        if obj != None:
+        if obj != None and obj.is_past_due():
             self.exclude = ('due_date', )
+
         self.form.user = request.user
         return super(PayableAdmin, self).get_form(request, **kwargs)
 
