@@ -112,8 +112,16 @@ class ReceivableAdmin(admin.ModelAdmin):
 
     def confirm_as_received(self, request, queryset):
         for receivable in queryset:
-            receivable.received = True
-            receivable.save()    
+            if not receivable.received:
+                receivable.received = True
+                receivable.save()
+                new_revenue = Revenue.objects.create(
+                            date=receivable.due_date,
+                            value=receivable.value,
+                            account=receivable.account,
+                            customer=receivable.customer
+                        )
+                new_revenue.save()
 
     def get_queryset(self, request):
         qs = super(ReceivableAdmin, self).get_queryset(request)
@@ -149,8 +157,16 @@ class PayableAdmin(admin.ModelAdmin):
 
     def confirm_as_paid(self, request, queryset):
         for payable in queryset:
-            payable.paid = True
-            payable.save() 
+            if not payable.paid:
+                payable.paid = True
+                payable.save()
+                new_expense = Expense.objects.create(
+                            date=payable.due_date,
+                            value=payable.value,
+                            account=payable.account,
+                            supplier=payable.supplier
+                        )
+                new_expense.save()
 
     def get_queryset(self, request):
         qs = super(PayableAdmin, self).get_queryset(request)

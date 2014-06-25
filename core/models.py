@@ -68,7 +68,7 @@ class Person(models.Model):
 
 
 class Transaction(models.Model):
-    date = models.DateField(auto_now_add=True, verbose_name='Date')
+    date = models.DateField(default=date.today(), verbose_name='Date')
     value = models.DecimalField(max_digits=13, decimal_places=2, verbose_name='Value')
 
     class Meta:
