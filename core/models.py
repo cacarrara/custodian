@@ -108,6 +108,7 @@ class TransactionEvent(models.Model):
 class Receivable(Accounts):
     account = models.ForeignKey(Account, related_name='related_receivables', verbose_name='Related Account')
     customer = models.ForeignKey(Person, related_name='receivables', verbose_name='Customer')
+    received = models.BooleanField(default=False, verbose_name='Received')
 
     def __str__(self):
         return '%s: %s - %s' % (self.due_date, self.value, self.customer.name)
@@ -117,6 +118,7 @@ class Receivable(Accounts):
 class Payable(Accounts):
     account = models.ForeignKey(Account, related_name='related_payables', verbose_name='Related Account')
     supplier = models.ForeignKey(Person, related_name='payables', verbose_name='Supplier')
+    paid = models.BooleanField(default=False, verbose_name='Paid')
 
     def __str__(self):
         return '%s: %s - %s' % (self.due_date, self.value, self.supplier.name)

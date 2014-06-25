@@ -85,14 +85,15 @@ class PersonAdmin(admin.ModelAdmin):
 
 class ReceivableAdmin(admin.ModelAdmin):
     form = ReceivableModelForm
+    exclude = ('received',)
     list_display = ('customer', 'value', 'due_date',
-                    'description', 'account')
+                    'description', 'account', 'received')
     search_fields = ('customer__name', 'description', 'account__name')
-    actions = ('repeat_next_month',)
+    actions = ('repeat_next_month', 'confirm_as_received')
 
     def get_form(self, request, obj=None, **kwargs):
         if obj != None and obj.is_past_due():
-            self.exclude = ('due_date', )
+            self.exclude += ('due_date', )
 
         self.form.user = request.user
         return super(ReceivableAdmin, self).get_form(request, **kwargs)
@@ -100,15 +101,19 @@ class ReceivableAdmin(admin.ModelAdmin):
     def repeat_next_month(self, request, queryset):
         for receivable in queryset:
             new_due_date = get_next_month(receivable.due_date)
-            new_payable = Receivable.objects.create(
+            new_receivable = Receivable.objects.create(
                             value=receivable.value,
                             due_date=new_due_date,
                             description=receivable.description,
                             account=receivable.account,
                             customer=receivable.customer
                         )
+            new_receivable.save()
 
-            new_payable.save()
+    def confirm_as_received(self, request, queryset):
+        for receivable in queryset:
+            receivable.received = True
+            receivable.save()    
 
     def get_queryset(self, request):
         qs = super(ReceivableAdmin, self).get_queryset(request)
@@ -117,14 +122,15 @@ class ReceivableAdmin(admin.ModelAdmin):
 
 class PayableAdmin(admin.ModelAdmin):
     form = PayableModelForm
+    exclude = ('paid',)
     list_display = ('supplier', 'value', 'due_date',
-                    'description', 'account')
+                    'description', 'account', 'paid')
     search_fields = ('supplier__name', 'description', 'account__name')
-    actions = ('repeat_next_month',)
+    actions = ('repeat_next_month', 'confirm_as_paid')
 
     def get_form(self, request, obj=None, **kwargs):
         if obj != None and obj.is_past_due():
-            self.exclude = ('due_date', )
+            self.exclude += ('due_date', )
 
         self.form.user = request.user
         return super(PayableAdmin, self).get_form(request, **kwargs)
@@ -140,6 +146,11 @@ class PayableAdmin(admin.ModelAdmin):
                             supplier=payable.supplier
                         )
             new_payable.save()
+
+    def confirm_as_paid(self, request, queryset):
+        for payable in queryset:
+            payable.paid = True
+            payable.save() 
 
     def get_queryset(self, request):
         qs = super(PayableAdmin, self).get_queryset(request)
