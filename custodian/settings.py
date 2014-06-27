@@ -125,5 +125,8 @@ SUIT_CONFIG = {
         {'label': 'Operations', 'icon': 'icon-pencil',
             'models': ('core.expense', 'core.revenue',)},
         '-',
+        {'label': 'Dashboard', 'icon': 'icon-th', 
+            'url': '/admin/dashboard'},
+        '-',
     ),
 }
