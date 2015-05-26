@@ -7,18 +7,19 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.timezone import now as dj_timezone_now
 
 
 @python_2_unicode_compatible
 class Account(models.Model):
     name = models.CharField(max_length=128, unique=True, verbose_name='Name')
-    init_balance = models.DecimalField(max_digits=13, decimal_places=2, 
-                                    default=Decimal('0.00'), verbose_name='Initial Balance')
-    balance = models.DecimalField(max_digits=13, decimal_places=2, 
-                                    default=Decimal('0.00'), verbose_name='Balance')
+    init_balance = models.DecimalField(max_digits=13, decimal_places=2,
+                                       default=Decimal('0.00'), verbose_name='Initial Balance')
+    balance = models.DecimalField(max_digits=13, decimal_places=2,
+                                  default=Decimal('0.00'), verbose_name='Balance')
     creation_date = models.DateField(auto_now_add=True, verbose_name='Creation Date')
     owner = models.ForeignKey(User, related_name='accounts', verbose_name='Owner')
-    
+
     class Meta:
         ordering = ['-creation_date']
 
@@ -68,7 +69,7 @@ class Person(models.Model):
 
 
 class Transaction(models.Model):
-    date = models.DateField(default=date.today(), verbose_name='Date')
+    date = models.DateField(default=dj_timezone_now, verbose_name='Date')
     value = models.DecimalField(max_digits=13, decimal_places=2, verbose_name='Value')
 
     class Meta:
@@ -135,8 +136,8 @@ def post_save_transaction_event(sender, **kwargs):
 
     transaction = kwargs['instance']
     transaction_event = TransactionEvent.objects.create(
-            value=transaction.value,
-            transaction_type=transaction_type,
-            account=transaction.account
-        )
+        value=transaction.value,
+        transaction_type=transaction_type,
+        account=transaction.account
+    )
     transaction_event.save()

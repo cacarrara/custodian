@@ -1,0 +1,12 @@
+DEBUG=True
+SECRET_KEY=5-a#6mvv!9#w+hadz(6)hgu#es8apmt&&kr$3u@ukszitjr&iz
+
+#DATABASE_URL=postgres://USER:PASSWORD@HOST:PORT/NAME
+
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+
+#STATIC_URL=/static/
+#MEDIA_URL=/media/

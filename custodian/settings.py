@@ -15,6 +15,8 @@ from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
 from decouple import config
 
+from dj_database_url import parse as db_url
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
@@ -27,14 +29,19 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-TEMPLATE_DEBUG = config('TEMPLATE_DEBUG', default=False, cast=bool)
+TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 ADMINS = (
     ('Caio Carrara', 'caiocarrara@gmail.com'),
 )
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 # Application definition
 TEMPLATE_DIRS = (
@@ -49,7 +56,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'south',
     'core',
 )
 
@@ -75,15 +81,13 @@ WSGI_APPLICATION = 'custodian.wsgi.application'
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE':   config('DATABASE_ENGINE'),
-        'NAME':     config('DATABASE_NAME'),
-        'USER':     config('DATABASE_USER'),
-        'PASSWORD': config('DATABASE_PASSWORD', default=''),
-        'HOST':     config('DATABASE_HOST'),
-        'PORT':     config('DATABASE_PORT'),
-    }
+    'default': config(
+        'DATABASE_URL',
+        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
+        cast=db_url
+    )
 }
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
@@ -100,12 +104,17 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.6/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '/static/'
+# https://docs.djangoproject.com/en/1.8/howto/static-files/
+STATIC_URL = config('STATIC_URL', default='/static/')
+STATIC_ROOT = 'static_deploy'  # when run collectstatic the result will be here
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
+# Media files
+MEDIA_URL = config('MEDIA_URL', default='/media/')
+MEDIA_ROOT = 'media'
 
 SUIT_CONFIG = {
     'ADMIN_NAME': 'Custodian - Basic Financial Management',
@@ -114,17 +123,15 @@ SUIT_CONFIG = {
         'sites',
         'auth',
         '-',
-        {'label': 'Dashboard', 'icon': 'icon-th', 
+        {'label': 'Dashboard', 'icon': 'icon-th',
             'url': '/admin/dashboard'},
         '-',
         {'label': 'Registers', 'icon': 'icon-cog',
             'models': ('core.payable',
-                        'core.receivable',
-                        'core.person', 
-                        'core.account',
-                        'core.businesssegment',
-            )
-        },
+                       'core.receivable',
+                       'core.person',
+                       'core.account',
+                       'core.businesssegment',)},
         {'label': 'Operations', 'icon': 'icon-pencil',
             'models': ('core.expense', 'core.revenue',)},
         '-',
