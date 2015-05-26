@@ -26,6 +26,14 @@ class Account(models.Model):
     def __str__(self):
         return "%s (%s)" % (self.name, self.balance)
 
+    def withdraw(self, amount=0.0):
+        self.balance -= amount
+        self.save()
+
+    def deposit(self, amount=0.0):
+        self.balance += amount
+        self.save()
+
 
 class Accounts(models.Model):
     value = models.DecimalField(max_digits=13, decimal_places=2, default=Decimal('0.00'), verbose_name='Value')
@@ -84,6 +92,10 @@ class Revenue(Transaction):
     def __str__(self):
         return '%s - %s' % (self.value, self.customer.name)
 
+    def save(self):
+        super(Revenue, self).save()
+        self.account.deposit(amount=self.value)
+
 
 @python_2_unicode_compatible
 class Expense(Transaction):
@@ -92,6 +104,10 @@ class Expense(Transaction):
 
     def __str__(self):
         return '%s - %s' % (self.value, self.supplier.name)
+
+    def save(self):
+        super(Expense, self).save()
+        self.account.withdraw(amount=self.value)
 
 
 class TransactionEvent(models.Model):
