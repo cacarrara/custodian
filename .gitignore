@@ -40,9 +40,13 @@ Thumbs.db
 # Directories
 env
 bin
-lib
 include
 media
+platforms
+node_modules
+bower_components
+.vagrant
+.sass-cache
 
 # Files
 *.py[cod]
@@ -51,3 +55,4 @@ media
 *.egg
 *.egg-info
 *.db
+*.sqlite3
